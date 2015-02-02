@@ -105,3 +105,43 @@ class JsonBContainsLookup(Lookup):
         rhs, rhs_params = self.process_rhs(qn, connection)
         params = lhs_params + rhs_params
         return "{0} @> {1}::jsonb".format(lhs, rhs), params
+
+
+class KVContainsLookup(Lookup):
+    """
+    Lookup that can be used as follows::
+
+        YourModel.objects.filter(data__kvcontains={"key": "value"})
+
+    Which will be translated into the following SQL::
+
+        select * from yourmodel where data->>'key' LIKE 'value'
+
+    The KV stands for Key Value.
+    """
+    lookup_name = 'kvcontains'
+
+    def as_sql(self, qn, connection):
+        lhs, lhs_params = self.process_lhs(qn, connection)
+        rhs, rhs_params = self.process_rhs(qn, connection)
+
+        params=[]
+        [params.extend([k, v]) for k, v in rhs_params[0].items()]
+
+        return "{0} ->> {1} LIKE %s".format(lhs, rhs), params
+
+
+class IKVContainsLookup(Lookup):
+    """
+    A Lookup that is a case-insensitive version of KVContainsLookup.
+    """
+    lookup_name = 'ikvcontains'
+
+    def as_sql(self, qn, connection):
+        lhs, lhs_params = self.process_lhs(qn, connection)
+        rhs, rhs_params = self.process_rhs(qn, connection)
+
+        params=[]
+        [params.extend([k, v]) for k, v in rhs_params[0].items()]
+
+        return "{0} ->> {1} ILIKE %s".format(lhs, rhs), params

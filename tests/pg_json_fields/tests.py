@@ -173,6 +173,21 @@ class JsonBFieldTests(JsonFieldTests):
         qs = self.model_class.objects.filter(data__jcontains={"tags": ["sad"]})
         self.assertEqual(qs.count(), 1)
 
+    def test_like_lookup(self):
+        obj1 = self.model_class.objects.create(data={"title": "An action story", "tags": ["violent", "romantic"]})
+        obj2 = self.model_class.objects.create(data={"title": "A sad story", "tags": ["sad", "romantic"]})
+        obj3 = self.model_class.objects.create(data={"title": "Story of a lifetime", "tags": ["sad", "romantic"]})
+
+        qs = self.model_class.objects.filter(data__kvcontains={"title": "%story%"})
+        self.assertEqual(qs.count(), 2)
+
+    def test_ilike_lookup(self):
+        obj1 = self.model_class.objects.create(data={"title": "An action story", "tags": ["violent", "romantic"]})
+        obj2 = self.model_class.objects.create(data={"title": "A sad story", "tags": ["sad", "romantic"]})
+        obj3 = self.model_class.objects.create(data={"title": "Story of a lifetime", "tags": ["sad", "romantic"]})
+
+        qs = self.model_class.objects.filter(data__ikvcontains={"title": "%story%"})
+        self.assertEqual(qs.count(), 3)
 
 
 #class ArrayFormFieldTests(TestCase):
